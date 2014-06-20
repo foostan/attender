@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+require 'net/http'
+require 'attender'
+
+Attender::Agent.new.run
+
