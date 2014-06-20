@@ -1,3 +1,5 @@
+require 'json'
+
 module Attender
   class Agent
     Signal.trap(:INT) { exit 0 }
@@ -9,6 +11,7 @@ module Attender
       @index = nil
       @response_queue = Queue.new
       STDOUT.sync = true
+      Thread.abort_on_exception = true
     end
 
     def run
@@ -20,9 +23,12 @@ module Attender
       end
 
       putter = Thread.new do
+        response = nil
         loop do
           unless @response_queue.empty?
-            put(@response_queue.pop)
+            prev_response = response
+            response = @response_queue.pop
+            put(response, prev_response)
           end
           sleep rand * 0.1
         end
@@ -40,19 +46,29 @@ module Attender
 
       code = response.code
       unless code == '200'
-        abort("Invalid status code #{code}")
+        raise "Invalid status code #{code}"
       end
 
       @index = response['x-consul-index']
       if @index.nil?
-        abort('Missing x-consul-index')
+        raise 'Missing x-consul-index'
       end
 
-      response.body
+      JSON.parse(response.body)
     end
 
-    def put(response)
-      puts response
+    def put(response, prev_response)
+      return if prev_response.nil?
+      add_diff = response.select do |v|
+        !prev_response.include?(v)
+      end
+
+      ded_diff = prev_response.select do |v|
+        !response.include?(v)
+      end
+
+      puts add_diff.to_json
+      puts ded_diff.to_json
     end
   end
 end
