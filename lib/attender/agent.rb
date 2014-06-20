@@ -1,24 +1,32 @@
 module Attender
   class Agent
-
+    Signal.trap(:INT) { exit 0}
 
     def initialize
-      @url   = 'localhost'
-      @port  = '8500'
+      @url = 'localhost'
+      @port = '8500'
+      @timeout = 5
       @index = nil
+      STDOUT.sync = true
     end
 
     def run
       path = '/v1/health/state/passing'
 
-      while true
-        puts get(path)
+      loop do
+        response = get(path)
+
+        Thread.new do
+          puts response
+          Thread.pass
+        end
       end
     end
 
-    def get(path)
-      http     = Net::HTTP.new(@url, @port)
-      path += "?index=#{@index}" unless @index.nil?
+    def get(path, lp = true)
+      http = Net::HTTP.new(@url, @port)
+      http.read_timeout = @timeout
+      path+= "?wait=#{(@timeout-1).to_s}s&index=#{@index}" unless @index.nil? if lp
       response = http.get(path)
 
       code = response.code
@@ -33,5 +41,6 @@ module Attender
 
       response.body
     end
+
   end
 end
