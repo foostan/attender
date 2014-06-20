@@ -59,16 +59,20 @@ module Attender
 
     def put(response, prev_response)
       return if prev_response.nil?
-      add_diff = response.select do |v|
-        !prev_response.include?(v)
+
+      response.select { |v| !prev_response.include?(v) }.each do |check|
+        put_format(check, '+')
       end
 
-      ded_diff = prev_response.select do |v|
-        !response.include?(v)
+      prev_response.select { |v| !response.include?(v) }.each do |check|
+        put_format(check, '-')
       end
+    end
 
-      puts add_diff.to_json
-      puts ded_diff.to_json
+    private
+
+    def put_format(check, type)
+      puts "#{type} #{check['Node']} #{check['CheckID']}"
     end
   end
 end
