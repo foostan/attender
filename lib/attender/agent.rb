@@ -1,26 +1,35 @@
 module Attender
   class Agent
-    Signal.trap(:INT) { exit 0}
+    Signal.trap(:INT) { exit 0 }
 
     def initialize
       @url = 'localhost'
       @port = '8500'
-      @timeout = 5
+      @timeout = 60
       @index = nil
+      @response_queue = Queue.new
       STDOUT.sync = true
     end
 
     def run
-      path = '/v1/health/state/passing'
-
-      loop do
-        response = get(path)
-
-        Thread.new do
-          puts response
-          Thread.pass
+      getter = Thread.new do
+        path = '/v1/health/state/passing'
+        loop do
+          @response_queue << get(path)
         end
       end
+
+      putter = Thread.new do
+        loop do
+          unless @response_queue.empty?
+            put(@response_queue.pop)
+          end
+          sleep rand * 0.1
+        end
+      end
+
+      getter.join
+      putter.join
     end
 
     def get(path, lp = true)
@@ -42,5 +51,8 @@ module Attender
       response.body
     end
 
+    def put(response)
+      puts response
+    end
   end
 end
