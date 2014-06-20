@@ -4,9 +4,9 @@ module Attender
   class Agent
     Signal.trap(:INT) { exit 0 }
 
-    def initialize
-      @url = 'localhost'
-      @port = '8500'
+    def initialize(url, port)
+      @url = url.nil? ? 'localhost' : url
+      @port = port.nil? ? '8500' : port
       @timeout = 60
       @index = nil
       @response_queue = Queue.new
