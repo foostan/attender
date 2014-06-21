@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-require 'net/http'
 require 'attender'
 
 Attender::Agent.new(ARGV[0], ARGV[1]).run

@@ -1,4 +1,5 @@
 require 'json'
+require 'net/http'
 
 module Attender
   class Agent
