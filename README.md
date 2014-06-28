@@ -1,6 +1,6 @@
 # Attender
 
-TODO: Write a gem description
+Attend consul cluster and notification with changing consul index.
 
 ## Installation
 
@@ -17,8 +17,16 @@ Or install it yourself as:
     $ gem install attender
 
 ## Usage
-
-TODO: Write usage instructions here
+setup test environment (https://github.com/foostan/enforcer#build-test-environment)
+```
+> bundle exec attender 192.168.33.101
+- server-01 service:apache2 # stop apache2 in server-01
+- server-01 service:ntp     # stop ntp in server-01
++ server-01 service:apache2 # start apache2 in server-01
++ server-01 service:ntp     # start ntp in server-01
+- client-01 serfHealth      # host down client-01
++ client
+```
 
 ## Contributing
 
